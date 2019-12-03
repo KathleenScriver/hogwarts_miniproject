@@ -1,11 +1,13 @@
 import React, { Component } from 'react'
 import HogTile from './HogTile'
 import HogFilter from './HogFilter'
+import HogSearch from './HogSearch'
 
 export default class HogContainter extends Component {
     state = {
         hogs: [],
-        greased: 'none',
+        greasedFilter: 'none',
+        nameSearch: '',
     }
 
     componentDidMount() {
@@ -15,13 +17,24 @@ export default class HogContainter extends Component {
     }
 
     filteredHogs = () => {
-        const { hogs, greased } = this.state
-        return greased === 'none'
-            ? hogs
-            : hogs.filter(hog => {
-                const check = greased === 'greased' ? true : false
+        const { hogs, greasedFilter, nameSearch } = this.state
+
+        const searchedHogs = nameSearch === '' ? hogs : this.searchHogs()
+
+        return greasedFilter === 'none'
+            ? searchedHogs
+            : searchedHogs.filter(hog => {
+                const check = greasedFilter === 'greased' ? true : false
                 return hog.greased === check
             })
+    }
+
+    searchHogs = () => {
+        const { hogs, nameSearch } = this.state
+
+        return hogs.filter(hog =>
+            hog.name.toLowerCase().includes(nameSearch)
+        )
     }
 
     createHogs = (hogList) => {
@@ -34,15 +47,21 @@ export default class HogContainter extends Component {
         const filterOption = event.target.value
      
         this.setState({
-            greased: filterOption,
+            greasedFilter: filterOption,
+        })
+    }
+
+    handleSearchChange = (search_input) => {
+        this.setState({
+            nameSearch: search_input 
         })
     }
 
     render() {
         return(
             <div id='all-hogs'>
-                <HogFilter 
-                    handleChange={(event) => this.handleFilterChange(event)} />
+                <HogFilter handleChange={(event) => this.handleFilterChange(event)} />
+                <HogSearch handleSearch={(input) => this.handleSearchChange(input)} />
                 {this.createHogs(this.filteredHogs())}
             </div>
         )
